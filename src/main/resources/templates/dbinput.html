@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>DB Input Form</title>
+</head>
+<body>
+
+<h1>Add a String to the Database</h1>
+
+<form action="/dbinput/submit" method="post">
+    <label for="userString">Enter a string:</label>
+    <input type="text" id="userString" name="userString" required>
+    <button type="submit">Submit</button>
+</form>
+
+<br>
+<a href="/db">View DB Records</a>
+
+</body>
+</html>
