@@ -28,6 +28,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -114,7 +116,7 @@ public String dbinputForm() {
     return "dbinput";
 }
 
-@RequestMapping("/dbinput/submit")
+@PostMapping("/dbinput/submit")
 public String dbinputSubmit(@org.springframework.web.bind.annotation.RequestParam("userString") String userString,
                             Map<String, Object> model) {
     System.out.println("Ashley Day: /dbinput submitted value = " + userString);
