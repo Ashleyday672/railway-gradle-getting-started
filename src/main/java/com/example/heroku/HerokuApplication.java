@@ -46,6 +46,7 @@ public class HerokuApplication {
   private DataSource dataSource;
 
   public static void main(String[] args) throws Exception {
+    System.out.println("ASHLEY DAY");
     SpringApplication.run(HerokuApplication.class, args);
   }
 
