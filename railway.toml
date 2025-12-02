@@ -1,0 +1,5 @@
+[build]
+builder = "nixpacks"
+
+[variables]
+JAVA_VERSION = "8"
