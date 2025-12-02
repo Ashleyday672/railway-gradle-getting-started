@@ -74,6 +74,7 @@ public class HerokuApplication {
     }
   }
 
+  @Profile("production")   
   @Bean
   public DataSource dataSource() throws SQLException {
     if (dbUrl == null || dbUrl.isEmpty()) {
