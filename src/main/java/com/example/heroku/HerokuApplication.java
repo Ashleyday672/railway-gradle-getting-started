@@ -117,26 +117,28 @@ public String dbinputForm() {
 }
 
 @PostMapping("/dbinput/submit")
-public String dbinputSubmit(@org.springframework.web.bind.annotation.RequestParam("userString") String userString,
-                            Map<String, Object> model) {
+public String dbinputSubmit(
+        @RequestParam("userString") String userString,
+        Map<String, Object> model) {
+
     System.out.println("Ashley Day: /dbinput submitted value = " + userString);
 
     try (Connection connection = dataSource.getConnection()) {
         Statement stmt = connection.createStatement();
 
-        // Ensure the table exists
+        // Ensure table exists
         stmt.executeUpdate(
             "CREATE TABLE IF NOT EXISTS table_timestamp_and_random_string " +
             "(tick timestamp, random_string varchar(30))"
         );
 
-        // Insert the user-provided string instead of random string
+        // Insert the user-provided string
         stmt.executeUpdate(
             "INSERT INTO table_timestamp_and_random_string VALUES (now(), '" + userString + "')"
         );
 
-        model.put("message", "Successfully inserted: " + userString);
-        return "dbinput_success";
+        // Redirect to /db after success
+        return "redirect:/db";
 
     } catch (Exception e) {
         model.put("message", e.getMessage());
