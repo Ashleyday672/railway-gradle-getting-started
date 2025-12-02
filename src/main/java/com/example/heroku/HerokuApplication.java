@@ -108,6 +108,39 @@ private String getRandomString() {
   return sb.toString();
 }
 
+  @RequestMapping("/dbinput")
+public String dbinputForm() {
+    return "dbinput";
+}
+
+@RequestMapping("/dbinput/submit")
+public String dbinputSubmit(@org.springframework.web.bind.annotation.RequestParam("userString") String userString,
+                            Map<String, Object> model) {
+    System.out.println("Ashley Day: /dbinput submitted value = " + userString);
+
+    try (Connection connection = dataSource.getConnection()) {
+        Statement stmt = connection.createStatement();
+
+        // Ensure the table exists
+        stmt.executeUpdate(
+            "CREATE TABLE IF NOT EXISTS table_timestamp_and_random_string " +
+            "(tick timestamp, random_string varchar(30))"
+        );
+
+        // Insert the user-provided string instead of random string
+        stmt.executeUpdate(
+            "INSERT INTO table_timestamp_and_random_string VALUES (now(), '" + userString + "')"
+        );
+
+        model.put("message", "Successfully inserted: " + userString);
+        return "dbinput_success";
+
+    } catch (Exception e) {
+        model.put("message", e.getMessage());
+        return "error";
+    }
+}
+
 
   @Bean
   @Profile("production")   
