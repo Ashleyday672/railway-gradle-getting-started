@@ -15,6 +15,7 @@
  */
 
 package com.example.heroku;
+import org.springframework.context.annotation.Profile;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -74,8 +75,8 @@ public class HerokuApplication {
     }
   }
 
-  @Profile("production")   
   @Bean
+  @Profile("production")   
   public DataSource dataSource() throws SQLException {
     if (dbUrl == null || dbUrl.isEmpty()) {
       return new HikariDataSource();
