@@ -59,41 +59,42 @@ public class HerokuApplication {
 
  @RequestMapping("/db")
 String db(Map<String, Object> model) {
-  System.out.println("Ashley Day: db() was called and a row is being inserted."); // log for Railway
 
-  try (Connection connection = dataSource.getConnection()) {
-    Statement stmt = connection.createStatement();
+    System.out.println("Ashley Day — /db endpoint hit!");
 
-    // Create the new table with timestamp + random string
-    stmt.executeUpdate(
-        "CREATE TABLE IF NOT EXISTS table_timestamp_and_random_string " +
-        "(tick timestamp, random_string varchar(30))"
-    );
+    try (Connection connection = dataSource.getConnection()) {
+        Statement stmt = connection.createStatement();
 
-    // Insert current timestamp + random string on every request
-    stmt.executeUpdate(
-        "INSERT INTO table_timestamp_and_random_string VALUES (now(), '" + getRandomString() + "')"
-    );
+        stmt.executeUpdate(
+            "CREATE TABLE IF NOT EXISTS table_timestamp_and_random_string " +
+            "(tick timestamp, random_string varchar(30))"
+        );
 
-    // Read all rows back
-    ResultSet rs = stmt.executeQuery(
-        "SELECT tick, random_string FROM table_timestamp_and_random_string ORDER BY tick DESC"
-    );
+        // Insert an auto-generated row (required each refresh)
+        stmt.executeUpdate(
+            "INSERT INTO table_timestamp_and_random_string VALUES (now(), '" 
+            + getRandomString() + "')"
+        );
 
-    ArrayList<String> output = new ArrayList<>();
-    while (rs.next()) {
-      String ts = rs.getTimestamp("tick").toString();
-      String rand = rs.getString("random_string");
-      output.add("Time: " + ts + " | Random string: " + rand);
+        ResultSet rs = stmt.executeQuery(
+                "SELECT tick, random_string FROM table_timestamp_and_random_string"
+        );
+
+        ArrayList<String> output = new ArrayList<>();
+        while (rs.next()) {
+            output.add("Timestamp: " + rs.getTimestamp("tick") +
+                       " | String: " + rs.getString("random_string"));
+        }
+
+        model.put("records", output);
+        return "db";
+
+    } catch (Exception e) {
+        model.put("message", e.getMessage());
+        return "error";
     }
-
-    model.put("records", output);
-    return "db";
-  } catch (Exception e) {
-    model.put("message", e.getMessage());
-    return "error";
-  }
 }
+
 private String getRandomString() {
   // Simple random alphanumeric string, length 10 (≤ 30 chars for the column)
   String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
