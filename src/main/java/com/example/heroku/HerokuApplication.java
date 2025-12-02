@@ -16,7 +16,9 @@
 
 package com.example.heroku;
 import org.springframework.context.annotation.Profile;
-
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.Random;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,26 +57,57 @@ public class HerokuApplication {
     return "index";
   }
 
-  @RequestMapping("/db")
-  String db(Map<String, Object> model) {
-    try (Connection connection = dataSource.getConnection()) {
-      Statement stmt = connection.createStatement();
-      stmt.executeUpdate("CREATE TABLE IF NOT EXISTS ticks (tick timestamp)");
-      stmt.executeUpdate("INSERT INTO ticks VALUES (now())");
-      ResultSet rs = stmt.executeQuery("SELECT tick FROM ticks");
+ @RequestMapping("/db")
+String db(Map<String, Object> model) {
+  System.out.println("Ashley Day: db() was called and a row is being inserted."); // log for Railway
 
-      ArrayList<String> output = new ArrayList<String>();
-      while (rs.next()) {
-        output.add("Read from DB: " + rs.getTimestamp("tick"));
-      }
+  try (Connection connection = dataSource.getConnection()) {
+    Statement stmt = connection.createStatement();
 
-      model.put("records", output);
-      return "db";
-    } catch (Exception e) {
-      model.put("message", e.getMessage());
-      return "error";
+    // Create the new table with timestamp + random string
+    stmt.executeUpdate(
+        "CREATE TABLE IF NOT EXISTS table_timestamp_and_random_string " +
+        "(tick timestamp, random_string varchar(30))"
+    );
+
+    // Insert current timestamp + random string on every request
+    stmt.executeUpdate(
+        "INSERT INTO table_timestamp_and_random_string VALUES (now(), '" + getRandomString() + "')"
+    );
+
+    // Read all rows back
+    ResultSet rs = stmt.executeQuery(
+        "SELECT tick, random_string FROM table_timestamp_and_random_string ORDER BY tick DESC"
+    );
+
+    ArrayList<String> output = new ArrayList<>();
+    while (rs.next()) {
+      String ts = rs.getTimestamp("tick").toString();
+      String rand = rs.getString("random_string");
+      output.add("Time: " + ts + " | Random string: " + rand);
     }
+
+    model.put("records", output);
+    return "db";
+  } catch (Exception e) {
+    model.put("message", e.getMessage());
+    return "error";
   }
+}
+private String getRandomString() {
+  // Simple random alphanumeric string, length 10 (≤ 30 chars for the column)
+  String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  StringBuilder sb = new StringBuilder();
+  java.util.Random random = new java.util.Random();
+
+  for (int i = 0; i < 10; i++) {
+    int idx = random.nextInt(chars.length());
+    sb.append(chars.charAt(idx));
+  }
+
+  return sb.toString();
+}
+
 
   @Bean
   @Profile("production")   
